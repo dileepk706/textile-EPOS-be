@@ -1,6 +1,17 @@
+import dns from 'node:dns';
 import mongoose from 'mongoose';
 import env from '@/config/environment.js';
 import { logger } from '@/shared/logger.js';
+
+// Ensure Node.js DNS resolver can resolve SRV records on Windows/local environments
+try {
+  const currentServers = dns.getServers();
+  if (currentServers.length === 0 || currentServers.includes('127.0.0.1')) {
+    dns.setServers(['8.8.8.8', '1.1.1.1', ...currentServers.filter(s => s !== '127.0.0.1')]);
+  }
+} catch {
+  // Ignore DNS configuration errors if restricted
+}
 
 export const CONNECTION_STATES: Record<number, string> = {
   0: 'disconnected',
@@ -42,11 +53,25 @@ export const connectDB = async (uri: string = env.MONGODB_URI): Promise<typeof m
       logger.warn('⚠️ MongoDB connection disconnected');
     });
 
-    await mongoose.connect(uri, {
-      dbName: env.DB_NAME,
-      autoIndex: true,
-      serverSelectionTimeoutMS: 5000,
-    });
+    const maxRetries = 3;
+    let attempt = 0;
+    while (attempt < maxRetries) {
+      try {
+        attempt++;
+        await mongoose.connect(uri, {
+          dbName: env.DB_NAME,
+          autoIndex: true,
+          serverSelectionTimeoutMS: 8000,
+        });
+        return mongoose;
+      } catch (err) {
+        if (attempt >= maxRetries) {
+          throw err;
+        }
+        logger.warn(`⚠️ MongoDB connection attempt ${attempt} failed (${(err as Error).message}). Retrying in 1.5s...`);
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+    }
 
     return mongoose;
   } catch (error) {
