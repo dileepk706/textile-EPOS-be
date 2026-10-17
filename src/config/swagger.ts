@@ -36,10 +36,14 @@ const swaggerOptions: Options = {
   },
   // Document all routes under src/shared, src/routes, and src/module
   apis: [
-    './src/shared/factories/express.app.factory.ts',
-    './src/routes/*.ts',
-    './src/module/**/interfaces/*.routes.ts',
-    './src/module/**/interfaces/route/*.routes.ts',
+    './src/shared/factories/express.app.factory.{ts,js}',
+    './src/routes/*.{ts,js}',
+    './src/module/**/interfaces/*.routes.{ts,js}',
+    './src/module/**/interfaces/routes/*.routes.{ts,js}',
+    './dist/shared/factories/express.app.factory.js',
+    './dist/routes/*.js',
+    './dist/module/**/interfaces/*.routes.js',
+    './dist/module/**/interfaces/routes/*.routes.js',
   ],
 };
 

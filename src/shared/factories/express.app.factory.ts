@@ -40,16 +40,68 @@ class ExpressAppFactory {
   }
 
   private setupMiddleware(): void {
-    this.app.use(cookieParser());
-    this.app.use(requestLogger);
-    this.app.use(express.json());
-    this.app.use(helmet());
+    const configuredOrigins = env.CORS_ORIGIN
+      ? env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+      : [];
+
+    const defaultOrigins = [
+      'https://textile-epos-fe-mjkd.vercel.app',
+      'http://localhost:8086',
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://localhost:4173',
+      'http://127.0.0.1:8086',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5173',
+    ];
+
+    const allowedOrigins = Array.from(new Set([...defaultOrigins, ...configuredOrigins]));
+
     this.app.use(
       cors({
-        origin: env.CORS_ORIGIN,
+        origin: (origin, callback) => {
+          // Allow requests with no origin (e.g. mobile apps, curl, Postman, server-to-server)
+          if (!origin) return callback(null, true);
+
+          // Allow wildcard '*' if configured
+          if (configuredOrigins.includes('*')) {
+            return callback(null, true);
+          }
+
+          // Exact origin match
+          if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+          }
+
+          // Match Vercel deployment preview domains or local dev ports
+          try {
+            const parsed = new URL(origin);
+            if (
+              parsed.hostname.endsWith('.vercel.app') ||
+              parsed.hostname === 'localhost' ||
+              parsed.hostname === '127.0.0.1'
+            ) {
+              return callback(null, true);
+            }
+          } catch {
+            // Ignore URL parse errors
+          }
+
+          callback(null, false);
+        },
         credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
       }),
     );
+
+    this.app.use(
+      helmet({
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+      }),
+    );
+    this.app.use(cookieParser());
+    this.app.use(requestLogger);
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(compression());
