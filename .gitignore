@@ -2,6 +2,8 @@ node_modules
 dist
 .env
 coverage
+logs/
+*.log
 todo.txt
 task.md
 todo.md

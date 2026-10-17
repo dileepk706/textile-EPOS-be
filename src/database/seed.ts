@@ -103,7 +103,9 @@ export const seedDatabase = async (): Promise<SeedResult> => {
     }
     if (modified) {
       await user.save();
-      logger.info(`Updated user [${user.email}] with role ADMIN and linked to textile [${textileIdStr}]`);
+      logger.info(
+        `Updated user [${user.email}] with role ADMIN and linked to textile [${textileIdStr}]`,
+      );
     }
     logger.info(`ℹ️ Existing admin/owner user found: [${user.email}] (Role: ${user.role})`);
   }

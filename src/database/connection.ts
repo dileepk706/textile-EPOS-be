@@ -7,7 +7,7 @@ import { logger } from '@/shared/logger.js';
 try {
   const currentServers = dns.getServers();
   if (currentServers.length === 0 || currentServers.includes('127.0.0.1')) {
-    dns.setServers(['8.8.8.8', '1.1.1.1', ...currentServers.filter(s => s !== '127.0.0.1')]);
+    dns.setServers(['8.8.8.8', '1.1.1.1', ...currentServers.filter((s) => s !== '127.0.0.1')]);
   }
 } catch {
   // Ignore DNS configuration errors if restricted
@@ -68,7 +68,9 @@ export const connectDB = async (uri: string = env.MONGODB_URI): Promise<typeof m
         if (attempt >= maxRetries) {
           throw err;
         }
-        logger.warn(`⚠️ MongoDB connection attempt ${attempt} failed (${(err as Error).message}). Retrying in 1.5s...`);
+        logger.warn(
+          `⚠️ MongoDB connection attempt ${attempt} failed (${(err as Error).message}). Retrying in 1.5s...`,
+        );
         await new Promise((resolve) => setTimeout(resolve, 1500));
       }
     }
