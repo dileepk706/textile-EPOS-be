@@ -1,0 +1,35 @@
+export interface IPurchase {
+  id?: string;
+  _id?: any;
+  invoice_id: string;
+  invoice_number: string;
+  batch_id: string;
+  batch_number: string;
+  supplier_id: string;
+  supplier_name: string;
+  staff_id: string;
+  staff_name?: string;
+  till_id?: string | null;
+  product_id: string;
+  product_name: string;
+  barcode: string;
+  quantity: number;
+  unit?: string;
+  cost_price: number;
+  selling_price: number;
+  mrp?: number;
+  tax_rate?: number;
+  tax_amount?: number;
+  discount?: number;
+  subtotal: number;
+  total_amount: number;
+  total_paid: number;
+  serial_number_indexes?: string[];
+  serial_numbers_purchased?: string[];
+  notes?: string;
+  deleted: string;
+  textile_id?: string | null;
+  tenant_id?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
