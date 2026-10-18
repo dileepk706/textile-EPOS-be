@@ -24,7 +24,8 @@ const getController = () => container.resolve<IProductController>('IProductContr
  * @swagger
  * /api/products:
  *   get:
- *     summary: List all products
+ *     summary: List all products with real-time aggregated quantity_available
+ *     description: Retrieves the product catalog. The quantity_available field is dynamically computed in real-time by aggregating available inventory from active product batches.
  *     tags: [Products]
  *     parameters:
  *       - in: query
@@ -37,9 +38,14 @@ const getController = () => container.resolve<IProductController>('IProductContr
  *         schema:
  *           type: string
  *         description: Exact barcode search
+ *       - in: query
+ *         name: is_active
+ *         schema:
+ *           type: boolean
+ *         description: Filter by active status
  *     responses:
  *       200:
- *         description: Products retrieved successfully
+ *         description: Products retrieved successfully with quantity_available
  */
 productRouter.get(
   '/',

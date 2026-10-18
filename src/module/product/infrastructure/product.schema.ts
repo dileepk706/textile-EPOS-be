@@ -58,7 +58,12 @@ export const ProductSchema = new Schema<IProductDocument>(
       type: Boolean,
       default: true,
     },
+    quantity_available: {
+      type: Number,
+      default: 0,
+    },
   },
+
   {
     timestamps: true,
     toJSON: {

@@ -11,6 +11,8 @@ export interface IProduct {
   textile_id?: string | null;
   tenant_id?: string | null;
   is_active?: boolean;
+  quantity_available?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
+
