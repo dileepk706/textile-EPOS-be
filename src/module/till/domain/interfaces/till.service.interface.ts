@@ -11,7 +11,9 @@ export interface TillContext {
   userId?: string;
   textileId?: string;
   tenantId?: string;
+  password?: string;
 }
+
 
 export default interface ITillService {
   createTill(data: CreateTillDto, context: TillContext): Promise<ITill>;
@@ -20,10 +22,16 @@ export default interface ITillService {
   openTill(id: string, data: OpenTillDto, context: TillContext): Promise<ITill>;
   closeTill(id: string, data: CloseTillDto, context: TillContext): Promise<ITill>;
   unlinkTill(id: string, context: TillContext): Promise<ITill>;
-  linkTill(id: string, password: string, deviceInfo?: string, context?: TillContext): Promise<ITill>;
+  linkTill(
+    id: string,
+    password: string,
+    deviceInfo?: string,
+    context?: TillContext,
+  ): Promise<ITill>;
   blockTill(id: string, data: BlockTillDto): Promise<ITill>;
   updatePassword(id: string, data: UpdateTillPasswordDto): Promise<ITill>;
   cashIn(id: string, data: CashInTillDto, context?: TillContext): Promise<ITill>;
   cashOut(id: string, data: CashOutTillDto, context?: TillContext): Promise<ITill>;
+  getCashBalance(idOrCode: string): Promise<number>;
 }
 

@@ -26,7 +26,8 @@ const env: EnvType = {
   IS_DEVELOPMENT: isDevelopment(),
   IS_TEST: false,
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/textile_epos',
+  MONGODB_URI:
+    (isProduction() ? process.env.MONGODB_URI : 'mongodb://127.0.0.1:27017/textile_epos') || '',
   DB_NAME: process.env.DB_NAME || 'textile_epos',
   ACCESS_SECRET: process.env.ACCESS_SECRET || 'access_secret',
   REFRESH_SECRET: process.env.REFRESH_SECRET || 'refresh_secret',

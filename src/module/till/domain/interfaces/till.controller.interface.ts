@@ -12,5 +12,7 @@ export default interface ITillController {
   updatePassword(req: Request, res: Response): Promise<any>;
   cashIn(req: Request, res: Response): Promise<any>;
   cashOut(req: Request, res: Response): Promise<any>;
+  getCashBalance(req: Request, res: Response): Promise<any>;
 }
+
 

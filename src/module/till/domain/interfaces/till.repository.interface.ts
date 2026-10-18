@@ -8,4 +8,5 @@ export default interface ITillRepository {
   findAll(filter?: Record<string, any>): Promise<ITill[]>;
   update(id: string, data: Partial<ITill>): Promise<ITill | null>;
   delete(id: string): Promise<boolean>;
+  getCashBalance(idOrCode: string): Promise<number | null>;
 }

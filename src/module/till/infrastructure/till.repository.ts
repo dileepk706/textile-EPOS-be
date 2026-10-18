@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { injectable } from 'tsyringe';
 import TillModel from '@/module/till/infrastructure/till.schema.js';
 import ITillRepository from '@/module/till/domain/interfaces/till.repository.interface.js';
@@ -48,4 +49,14 @@ export default class TillRepository implements ITillRepository {
     const result = await TillModel.findByIdAndDelete(id);
     return !!result;
   }
+
+  async getCashBalance(idOrCode: string): Promise<number | null> {
+    const query = mongoose.Types.ObjectId.isValid(idOrCode)
+      ? { _id: idOrCode }
+      : { code: idOrCode.toUpperCase().trim() };
+    const till = await TillModel.findOne(query, { cash_in_till: 1 }).lean();
+    if (!till) return null;
+    return till.cash_in_till ?? 0;
+  }
 }
+

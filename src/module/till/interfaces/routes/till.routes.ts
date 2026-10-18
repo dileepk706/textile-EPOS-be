@@ -136,6 +136,67 @@ tillRouter.get(
 
 /**
  * @swagger
+ * /api/tills/{id}/cash:
+ *   get:
+ *     summary: Lightning-fast endpoint to get current cash balance of a till
+ *     description: Returns only the raw number (e.g. 1500) for real-time WebRTC and low-latency POS sync. Pass ?format=object to receive { cash_in_till: 1500 }.
+ *     tags: [Till]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Till ID or Till Code (e.g. TILL-01)
+ *       - in: query
+ *         name: format
+ *         schema:
+ *           type: string
+ *           enum: [raw, object]
+ *         description: Set to object to get JSON { cash_in_till: number }, defaults to raw number
+ *     responses:
+ *       200:
+ *         description: Current cash in till as a number
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: number
+ *               example: 1250.5
+ *       404:
+ *         description: Till not found
+ */
+tillRouter.get(
+  '/:id/cash',
+  authenticate,
+  requireStaff,
+  asyncHandler((req: Request, res: Response) => getController().getCashBalance(req, res)),
+);
+
+// Aliases for real-time / WebRTC integration
+tillRouter.get(
+  '/:id/balance',
+  authenticate,
+  requireStaff,
+  asyncHandler((req: Request, res: Response) => getController().getCashBalance(req, res)),
+);
+tillRouter.get(
+  '/:id/cash-balance',
+  authenticate,
+  requireStaff,
+  asyncHandler((req: Request, res: Response) => getController().getCashBalance(req, res)),
+);
+tillRouter.get(
+  '/:id/cash-in-till',
+  authenticate,
+  requireStaff,
+  asyncHandler((req: Request, res: Response) => getController().getCashBalance(req, res)),
+);
+
+
+/**
+ * @swagger
  * /api/tills/{id}/open:
  *   post:
  *     summary: Setup/open a till with opening cash balance for the day/shift

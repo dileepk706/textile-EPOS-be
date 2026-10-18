@@ -125,7 +125,7 @@ export default class TillService implements ITillService {
   }
 
   async closeTill(id: string, data: CloseTillDto, context: TillContext): Promise<ITill> {
-    const till = await this.tillRepository.findById(id);
+    const till = await this.tillRepository.findWithPassword(id);
     if (!till) {
       throw new ApiError(`Till with ID '${id}' not found`, httpStatus.NOT_FOUND);
     }
@@ -348,4 +348,13 @@ export default class TillService implements ITillService {
     }
     return updated;
   }
+
+  async getCashBalance(idOrCode: string): Promise<number> {
+    const balance = await this.tillRepository.getCashBalance(idOrCode);
+    if (balance === null) {
+      throw new ApiError(`Till '${idOrCode}' not found`, httpStatus.NOT_FOUND);
+    }
+    return balance;
+  }
 }
+

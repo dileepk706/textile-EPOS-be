@@ -20,8 +20,10 @@ export default class TillController implements ITillController {
           ? String(req.user.textiles_id || req.user.textile_id)
           : undefined,
       tenantId: req.user?.tenant_id ? String(req.user.tenant_id) : undefined,
+      password: req.body?.password,
     };
   }
+
 
   private getParamId(req: Request): string {
     return Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
@@ -147,4 +149,21 @@ export default class TillController implements ITillController {
       httpStatus.OK,
     );
   };
+
+  getCashBalance = async (req: Request, res: Response) => {
+    const id = this.getParamId(req);
+    const balance = await this.tillService.getCashBalance(id);
+
+    // Prevent stale caching for real-time reads
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+
+    // If client requested an object format (?format=object or ?raw=false)
+    if (req.query.format === 'object' || req.query.raw === 'false') {
+      return res.status(httpStatus.OK).json({ cash_in_till: balance });
+    }
+
+    // Ultra-lightweight response: returns only the number
+    return res.status(httpStatus.OK).json(balance);
+  };
 }
+
