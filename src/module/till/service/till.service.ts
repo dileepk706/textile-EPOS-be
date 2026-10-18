@@ -12,6 +12,8 @@ import { OpenTillDto } from '@/module/till/application/dtos/open-till.dto.js';
 import { CloseTillDto } from '@/module/till/application/dtos/close-till.dto.js';
 import { UpdateTillPasswordDto } from '@/module/till/application/dtos/update-till-password.dto.js';
 import { BlockTillDto } from '@/module/till/application/dtos/block-till.dto.js';
+import { CashInTillDto } from '@/module/till/application/dtos/cash-in-till.dto.js';
+import { CashOutTillDto } from '@/module/till/application/dtos/cash-out-till.dto.js';
 import TextileModel from '@/module/textile/infrastructure/textile.schema.js';
 
 @injectable()
@@ -96,11 +98,9 @@ export default class TillService implements ITillService {
       throw new ApiError('Till is already open', httpStatus.BAD_REQUEST);
     }
 
-    if (data.password && till.password) {
-      const isValid = await comparePassword(data.password, till.password);
-      if (!isValid) {
-        throw new ApiError('Invalid till PIN or password', httpStatus.UNAUTHORIZED);
-      }
+    const isValid = await comparePassword(data.password, till.password);
+    if (!isValid) {
+      throw new Error('Invalid till PIN or password');
     }
 
     const updatePayload: Partial<ITill> = {
@@ -128,6 +128,11 @@ export default class TillService implements ITillService {
     const till = await this.tillRepository.findById(id);
     if (!till) {
       throw new ApiError(`Till with ID '${id}' not found`, httpStatus.NOT_FOUND);
+    }
+
+    const isValid = await comparePassword(data.password, till.password);
+    if (!isValid) {
+      throw new ApiError('Invalid till PIN or password', httpStatus.UNAUTHORIZED);
     }
 
     if (till.status !== 'open') {
@@ -245,6 +250,101 @@ export default class TillService implements ITillService {
     const updated = await this.tillRepository.update(id, { password: hashedPassword });
     if (!updated) {
       throw new ApiError('Failed to update till password', httpStatus.INTERNAL_SERVER_ERROR);
+    }
+    return updated;
+  }
+
+  async cashIn(id: string, data: CashInTillDto, _context?: TillContext): Promise<ITill> {
+    const till = await this.tillRepository.findWithPassword(id);
+    if (!till) {
+      throw new ApiError(`Till with ID '${id}' not found`, httpStatus.NOT_FOUND);
+    }
+
+    if (till.is_blocked || till.status === 'blocked') {
+      throw new ApiError('Till is blocked. Cannot move cash.', httpStatus.FORBIDDEN);
+    }
+
+    if (till.status !== 'open') {
+      throw new ApiError(
+        'Till is not open. Cash can only be added to an open till.',
+        httpStatus.BAD_REQUEST,
+      );
+    }
+
+    const isValid = await comparePassword(data.password, till.password);
+    if (!isValid) {
+      throw new ApiError('Invalid till PIN or password', httpStatus.UNAUTHORIZED);
+    }
+
+    const currentCash = Number(till.cash_in_till || 0);
+    const newCash = Number((currentCash + data.amount).toFixed(2));
+
+    const noteEntry = data.notes || data.reason;
+    const updatedNotes = noteEntry
+      ? till.notes
+        ? `${till.notes}; Cash In: +₹${data.amount} (${noteEntry})`
+        : `Cash In: +₹${data.amount} (${noteEntry})`
+      : till.notes;
+
+    const updatePayload: Partial<ITill> = {
+      cash_in_till: newCash,
+      notes: updatedNotes,
+    };
+
+    const updated = await this.tillRepository.update(id, updatePayload);
+    if (!updated) {
+      throw new ApiError('Failed to update till cash balance', httpStatus.INTERNAL_SERVER_ERROR);
+    }
+    return updated;
+  }
+
+  async cashOut(id: string, data: CashOutTillDto, _context?: TillContext): Promise<ITill> {
+    const till = await this.tillRepository.findWithPassword(id);
+    if (!till) {
+      throw new ApiError(`Till with ID '${id}' not found`, httpStatus.NOT_FOUND);
+    }
+
+    if (till.is_blocked || till.status === 'blocked') {
+      throw new ApiError('Till is blocked. Cannot move cash.', httpStatus.FORBIDDEN);
+    }
+
+    if (till.status !== 'open') {
+      throw new ApiError(
+        'Till is not open. Cash can only be taken from an open till.',
+        httpStatus.BAD_REQUEST,
+      );
+    }
+
+    const isValid = await comparePassword(data.password, till.password);
+    if (!isValid) {
+      throw new ApiError('Invalid till PIN or password', httpStatus.UNAUTHORIZED);
+    }
+
+    const currentCash = Number(till.cash_in_till || 0);
+    if (currentCash < data.amount) {
+      throw new ApiError(
+        `Insufficient cash in till '${till.name}'. Available: ₹${currentCash.toFixed(2)}, Requested: ₹${data.amount.toFixed(2)}`,
+        httpStatus.BAD_REQUEST,
+      );
+    }
+
+    const newCash = Number((currentCash - data.amount).toFixed(2));
+
+    const noteEntry = data.notes || data.reason;
+    const updatedNotes = noteEntry
+      ? till.notes
+        ? `${till.notes}; Cash Out: -₹${data.amount} (${noteEntry})`
+        : `Cash Out: -₹${data.amount} (${noteEntry})`
+      : till.notes;
+
+    const updatePayload: Partial<ITill> = {
+      cash_in_till: newCash,
+      notes: updatedNotes,
+    };
+
+    const updated = await this.tillRepository.update(id, updatePayload);
+    if (!updated) {
+      throw new ApiError('Failed to update till cash balance', httpStatus.INTERNAL_SERVER_ERROR);
     }
     return updated;
   }

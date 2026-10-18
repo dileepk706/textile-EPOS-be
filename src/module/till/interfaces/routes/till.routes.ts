@@ -10,6 +10,8 @@ import { openTillSchema } from '@/module/till/application/dtos/open-till.dto.js'
 import { closeTillSchema } from '@/module/till/application/dtos/close-till.dto.js';
 import { updateTillPasswordSchema } from '@/module/till/application/dtos/update-till-password.dto.js';
 import { blockTillSchema } from '@/module/till/application/dtos/block-till.dto.js';
+import { cashInTillSchema } from '@/module/till/application/dtos/cash-in-till.dto.js';
+import { cashOutTillSchema } from '@/module/till/application/dtos/cash-out-till.dto.js';
 import type { ModuleRouteConfig } from '@/routes/route.types.js';
 
 const tillRouter = Router();
@@ -387,6 +389,171 @@ tillRouter.patch(
   processRequestBody(updateTillPasswordSchema),
   asyncHandler((req: Request, res: Response) => getController().updatePassword(req, res)),
 );
+
+/**
+ * @swagger
+ * /api/tills/{id}/cash-in:
+ *   post:
+ *     summary: Move cash into till (increment cash balance) with password verification
+ *     tags: [Till]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Till ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *               - password
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 example: 500
+ *                 description: Cash amount to add to the till
+ *               password:
+ *                 type: string
+ *                 example: "1234"
+ *                 description: Till security password/PIN for verification
+ *               reason:
+ *                 type: string
+ *                 example: "Adding petty cash float"
+ *               notes:
+ *                 type: string
+ *                 example: "Received from main safe"
+ *     responses:
+ *       200:
+ *         description: Cash moved into till successfully
+ *       400:
+ *         description: Till not open or invalid amount
+ *       401:
+ *         description: Invalid till password
+ *       403:
+ *         description: Till is blocked
+ *       404:
+ *         description: Till not found
+ */
+tillRouter.post(
+  '/:id/cash-in',
+  authenticate,
+  requireStaff,
+  processRequestBody(cashInTillSchema),
+  asyncHandler((req: Request, res: Response) => getController().cashIn(req, res)),
+);
+
+// Aliases for moving cash into till
+tillRouter.post(
+  '/:id/move-cash-in',
+  authenticate,
+  requireStaff,
+  processRequestBody(cashInTillSchema),
+  asyncHandler((req: Request, res: Response) => getController().cashIn(req, res)),
+);
+tillRouter.post(
+  '/:id/deposit',
+  authenticate,
+  requireStaff,
+  processRequestBody(cashInTillSchema),
+  asyncHandler((req: Request, res: Response) => getController().cashIn(req, res)),
+);
+tillRouter.post(
+  '/:id/add-cash',
+  authenticate,
+  requireStaff,
+  processRequestBody(cashInTillSchema),
+  asyncHandler((req: Request, res: Response) => getController().cashIn(req, res)),
+);
+
+/**
+ * @swagger
+ * /api/tills/{id}/cash-out:
+ *   post:
+ *     summary: Take cash from till (decrement cash balance) with password verification
+ *     tags: [Till]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Till ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *               - password
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 example: 300
+ *                 description: Cash amount to withdraw from the till
+ *               password:
+ *                 type: string
+ *                 example: "1234"
+ *                 description: Till security password/PIN for verification
+ *               reason:
+ *                 type: string
+ *                 example: "Midday cash skim / drop to safe"
+ *               notes:
+ *                 type: string
+ *                 example: "Transferred to manager safe"
+ *     responses:
+ *       200:
+ *         description: Cash taken from till successfully
+ *       400:
+ *         description: Till not open or insufficient cash in till
+ *       401:
+ *         description: Invalid till password
+ *       403:
+ *         description: Till is blocked
+ *       404:
+ *         description: Till not found
+ */
+tillRouter.post(
+  '/:id/cash-out',
+  authenticate,
+  requireStaff,
+  processRequestBody(cashOutTillSchema),
+  asyncHandler((req: Request, res: Response) => getController().cashOut(req, res)),
+);
+
+// Aliases for taking cash from till
+tillRouter.post(
+  '/:id/move-cash-out',
+  authenticate,
+  requireStaff,
+  processRequestBody(cashOutTillSchema),
+  asyncHandler((req: Request, res: Response) => getController().cashOut(req, res)),
+);
+tillRouter.post(
+  '/:id/withdraw',
+  authenticate,
+  requireStaff,
+  processRequestBody(cashOutTillSchema),
+  asyncHandler((req: Request, res: Response) => getController().cashOut(req, res)),
+);
+tillRouter.post(
+  '/:id/take-cash',
+  authenticate,
+  requireStaff,
+  processRequestBody(cashOutTillSchema),
+  asyncHandler((req: Request, res: Response) => getController().cashOut(req, res)),
+);
+
 
 export const tillRouteConfig: ModuleRouteConfig = {
   basePath: '/tills',

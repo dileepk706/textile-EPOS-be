@@ -10,4 +10,7 @@ export default interface ITillController {
   linkTill(req: Request, res: Response): Promise<any>;
   blockTill(req: Request, res: Response): Promise<any>;
   updatePassword(req: Request, res: Response): Promise<any>;
+  cashIn(req: Request, res: Response): Promise<any>;
+  cashOut(req: Request, res: Response): Promise<any>;
 }
+

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const openTillSchema = z.object({
   opening_balance: z.number().nonnegative('Opening balance must be 0 or positive'),
-  password: z.string().optional(),
+  password: z.string().min(1, 'Password is required'),
   device_info: z.string().optional(),
   notes: z.string().optional(),
 });

@@ -4,6 +4,8 @@ import { OpenTillDto } from '@/module/till/application/dtos/open-till.dto.js';
 import { CloseTillDto } from '@/module/till/application/dtos/close-till.dto.js';
 import { UpdateTillPasswordDto } from '@/module/till/application/dtos/update-till-password.dto.js';
 import { BlockTillDto } from '@/module/till/application/dtos/block-till.dto.js';
+import { CashInTillDto } from '@/module/till/application/dtos/cash-in-till.dto.js';
+import { CashOutTillDto } from '@/module/till/application/dtos/cash-out-till.dto.js';
 
 export interface TillContext {
   userId?: string;
@@ -21,4 +23,7 @@ export default interface ITillService {
   linkTill(id: string, password: string, deviceInfo?: string, context?: TillContext): Promise<ITill>;
   blockTill(id: string, data: BlockTillDto): Promise<ITill>;
   updatePassword(id: string, data: UpdateTillPasswordDto): Promise<ITill>;
+  cashIn(id: string, data: CashInTillDto, context?: TillContext): Promise<ITill>;
+  cashOut(id: string, data: CashOutTillDto, context?: TillContext): Promise<ITill>;
 }
+

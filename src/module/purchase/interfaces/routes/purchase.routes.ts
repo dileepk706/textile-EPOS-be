@@ -3,7 +3,11 @@ import { container } from '@/config/container.js';
 import IPurchaseController from '@/module/purchase/domain/interfaces/purchase.controller.interface.js';
 import asyncHandler from '@/shared/middleware/async_handler.js';
 import { authenticate } from '@/shared/middleware/auth.middleware.js';
-import { requireAdmin, requireManagerOrAdmin, requireStaff } from '@/shared/middleware/rbac.middleware.js';
+import {
+  requireAdmin,
+  requireManagerOrAdmin,
+  requireStaff,
+} from '@/shared/middleware/rbac.middleware.js';
 import { processRequestBody } from '@/shared/middleware/validation.js';
 import { createPurchaseSchema } from '@/module/purchase/application/dtos/create-purchase.dto.js';
 import { updatePurchaseInvoiceSchema } from '@/module/purchase/application/dtos/update-purchase.dto.js';
@@ -80,7 +84,7 @@ purchaseRouter.get(
 purchaseRouter.get(
   '/invoices/:id',
   authenticate,
-  requireManagerOrAdmin,
+  requireStaff,
   asyncHandler((req: Request, res: Response) => getController().getInvoiceById(req, res)),
 );
 
@@ -219,7 +223,7 @@ purchaseRouter.delete(
 purchaseRouter.get(
   '/reports',
   authenticate,
-  requireManagerOrAdmin,
+  requireStaff,
   asyncHandler((req: Request, res: Response) => getController().getPurchaseReport(req, res)),
 );
 
@@ -436,7 +440,7 @@ purchaseRouter.get(
 purchaseRouter.post(
   '/',
   authenticate,
-  requireManagerOrAdmin,
+  requireStaff,
   processRequestBody(createPurchaseSchema),
   asyncHandler((req: Request, res: Response) => getController().createPurchase(req, res)),
 );
@@ -473,7 +477,7 @@ purchaseRouter.post(
 purchaseRouter.get(
   '/',
   authenticate,
-  requireManagerOrAdmin,
+  requireStaff,
   asyncHandler((req: Request, res: Response) => getController().getPurchases(req, res)),
 );
 
@@ -500,7 +504,7 @@ purchaseRouter.get(
 purchaseRouter.get(
   '/:id',
   authenticate,
-  requireManagerOrAdmin,
+  requireStaff,
   asyncHandler((req: Request, res: Response) => getController().getPurchaseById(req, res)),
 );
 

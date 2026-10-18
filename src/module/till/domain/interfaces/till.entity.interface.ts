@@ -5,7 +5,7 @@ export interface ITill {
   _id?: any;
   name: string;
   code: string;
-  password?: string;
+  password: string;
   status: TillStatus;
   is_blocked: boolean;
   cash_in_till: number;
